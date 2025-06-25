@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Kollegiets Indkøbsliste</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+      background-color: #f2f2f2;
+    }
+    h1 {
+      text-align: center;
+    }
+    form, .actions {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    input, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+    }
+    ul {
+      max-width: 400px;
+      margin: auto;
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      background: white;
+      margin-bottom: 0.5rem;
+      padding: 0.75rem;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .delete {
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+    }
+    .clear {
+      background: #444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛒 Kollegiets Indkøbsliste</h1>
+
+  <form id="form">
+    <input type="text" id="item" placeholder="Vare" required>
+    <input type="number" id="amount" placeholder="Antal" min="1" value="1" required>
+    <button type="submit">Tilføj</button>
+  </form>
+
+  <div class="actions">
+    <button class="clear" onclick="clearList()">Ryd hele listen</button>
+  </div>
+
+  <ul id="list"></ul>
+
+  <script>
+    const form = document.getElementById('form');
+    const itemInput = document.getElementById('item');
+    const amountInput = document.getElementById('amount');
+    const list = document.getElementById('list');
+
+    let items = JSON.parse(localStorage.getItem('groceryList')) || [];
+
+    function renderList() {
+      list.innerHTML = '';
+      items.forEach((entry, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `${entry.item} – ${entry.amount} stk 
+          <button class="delete" onclick="deleteItem(${index})">X</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    function deleteItem(index) {
+      items.splice(index, 1);
+      localStorage.setItem('groceryList', JSON.stringify(items));
+      renderList();
+    }
+
+    function clearList() {
+      if (confirm("Er du sikker på, at du vil rydde hele listen?")) {
+        items = [];
+        localStorage.removeItem('groceryList');
+        renderList();
+      }
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const item = itemInput.value.trim();
+      const amount = parseInt(amountInput.value);
+      if (item && amount > 0) {
+        items.push({ item, amount });
+        localStorage.setItem('groceryList', JSON.stringify(items));
+        itemInput.value = '';
+        amountInput.value = 1;
+        renderList();
+      }
+    });
+
+    renderList();
+  </script>
+</body>
+</html>
